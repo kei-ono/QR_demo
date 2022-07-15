@@ -25,7 +25,7 @@
         navigator.mediaDevices.getUserMedia({
             video: {
                 witdh: 640, height: 480,
-                facingMode: "user"
+                facingMode: {exact: "environment"}
             },
             audio: false,
         }).then(stream => {
