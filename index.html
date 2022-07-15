@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="//cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
+  <script src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+  <title>WEBカメラの映像を表示</title>
+</head>
+<body>
+    <div>
+        <h1>WEBカメラの映像を表示</h1>
+        <div>
+            <video id="video"></video>
+        </div>
+        <div>
+            <canvas id="canvas" width="640" height="480"></canvas>
+        </div>
+        <button id="capture">キャプチャー</button>
+    </div>  
+    <script>
+        var ctx = null;
+        ctx = canvas.getContext( '2d' );
+        const video = document.getElementById("video")
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+        }).then(stream => {
+            video.srcObject = stream;
+            video.play()
+        }).catch(e => {
+          console.log(e)
+        })
+        $('#capture').on('click', function(){
+            var video = document.getElementById('video');
+            var $canvas = $('#canvas');
+            
+            $canvas.attr('width', video.videoWidth);
+            $canvas.attr('height', video.videoHeight);
+            $canvas[0].getContext('2d').drawImage(video, 0, 0, $canvas.width(), $canvas.height());
+
+            checkQRCode();
+        });
+        function getSlice(data, start, len){
+            return data.slice(start, start+len);
+        }
+        function getDate(data, start){
+            var outputString = "Date: " + getSlice(data, start, 4) + "/" + getSlice(data, start+4, 2) + "/" + getSlice(data, start+6, 2);
+            outputString += " " + getSlice(data, start+8, 2) + ":" + getSlice(data, start+10, 2);
+            return outputString + "\r\n";
+        }
+        function getMeas(data, start, offset){
+            var outputString = "sys: " + Number(getSlice(data, start+1, 3)) + "\r\n";
+            outputString+="dia: " + Number(getSlice(data, start+9+offset*2, 3)) + "\r\n";
+            outputString+="pul: " + Number(getSlice(data, start+13+offset*3, 3)) + "\r\n";
+            outputString+="map: " + Number(getSlice(data, start+5+offset, 3));
+            return outputString + "\r\n";
+        }
+        function checkQRCode(){
+            var imageData = ctx.getImageData( 0, 0, canvas.width, canvas.height );
+            var code = jsQR( imageData.data, canvas.width, canvas.height );
+            if( code ){
+                console.log( code );
+                var strQR = code.data;
+                if(strQR[1]=="T" && strQR[14]=="I" && strQR[31]=="S" && strQR[35]=="M" && strQR[39]=="D" && strQR[43]=="P"){
+                    outPut = "QRコードV1\r\n"
+                    outPut += getDate(strQR, 2);
+                    outPut += getMeas(strQR, 31, 0);
+                }else if(strQR[34] =="T"){
+                    outPut = "QRコードV2\r\n"
+                    outPut += getDate(strQR, 35);
+                    outPut += getMeas(strQR, 50, 1);
+                }
+                else{
+                    outPut="non" + strQR[53];
+                    
+                } 
+                alert(outPut);
+                //alert( code.data );
+            }else{
+                alert( "No QR Code found." );
+            }
+        }
+
+
+
+
+    </script>  
+</body>
+</html>
