@@ -23,7 +23,10 @@
         ctx = canvas.getContext( '2d' );
         const video = document.getElementById("video")
         navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: {
+                witdh: 640, height: 480,
+                facingMode: "user"
+            },
             audio: false,
         }).then(stream => {
             video.srcObject = stream;
