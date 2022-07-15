@@ -25,9 +25,9 @@
         const video = document.getElementById("video")
         navigator.mediaDevices.getUserMedia({
             video: {
-                width:240,
-                height:120,
-                facingMode: 'environmentW'
+                width:480,
+                height:320,
+                facingMode: 'environment'
             },
             audio: false,
         }).then(stream => {
