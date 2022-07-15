@@ -23,10 +23,9 @@
         ctx = canvas.getContext( '2d' );
         const video = document.getElementById("video")
         navigator.mediaDevices.getUserMedia({
-            video:true,
             video: {
-                witdh: 640, height: 480,
-                facingMode: {exact: 'environment'}
+                witdh: 320, height: 240,
+                facingMode: 'environmentW'
             },
             audio: false,
         }).then(stream => {
@@ -85,7 +84,17 @@
                 alert( "No QR Code found." );
             }
         }
+        // videoセッション一時停止
+        function stopStreamedVideo(videoElem) {
+            let stream = videoElem.srcObject;
+            let tracks = stream.getTracks();
 
+            tracks.forEach(function(track) {
+                track.stop();
+            });
+
+            videoElem.srcObject = null;
+        }
 
 
 
